@@ -1,0 +1,82 @@
+{% extends "admin/base.html" %}
+{% block titulo %}Productos{% endblock %}
+
+{% block contenido %}
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <h2 class="fw-bold m-0">Productos</h2>
+    <a href="{{ url_for('nuevo_producto') }}" class="btn btn-success">
+        <i class="fas fa-plus"></i> Nuevo producto
+    </a>
+</div>
+
+<div class="table-responsive">
+    <table class="table table-hover align-middle bg-white shadow-sm rounded">
+        <thead class="table-dark">
+            <tr>
+                <th>Imagen</th>
+                <th>Nombre</th>
+                <th>Marca</th>
+                <th>Categoría</th>
+                <th>Precio</th>
+                <th>Stock</th>
+                <th>Estado</th>
+                <th class="text-end">Acciones</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for p in productos %}
+            <tr>
+                <td>
+                    {% if p.imagen %}
+                        <img src="{{ url_for('static', filename='uploads/' ~ p.imagen) }}"
+                             alt="{{ p.nombre }}"
+                             style="width:60px;height:60px;object-fit:cover;border-radius:8px;">
+                    {% else %}
+                        <div class="bg-secondary bg-opacity-25 d-flex align-items-center justify-content-center"
+                             style="width:60px;height:60px;border-radius:8px;">
+                            <i class="fas fa-image text-secondary"></i>
+                        </div>
+                    {% endif %}
+                </td>
+                <td class="fw-semibold">{{ p.nombre }}</td>
+                <td>{{ p.marca or '—' }}</td>
+                <td>{{ p.nombre_categoria }}</td>
+                <td>${{ "{:,.0f}".format(p.precio) }}</td>
+                <td>{{ p.stock }}</td>
+                <td>
+                    {% if p.estado == 'Activo' %}
+                        <span class="badge bg-success">Activo</span>
+                    {% else %}
+                        <span class="badge bg-secondary">Inactivo</span>
+                    {% endif %}
+                </td>
+                <td class="text-end">
+                    <a href="{{ url_for('editar_producto', id_producto=p.id_producto) }}"
+                       class="btn btn-sm btn-outline-primary" title="Editar">
+                        <i class="fas fa-pen"></i>
+                    </a>
+                    {% if p.estado == 'Activo' %}
+                        <a href="{{ url_for('desactivar_producto', id_producto=p.id_producto) }}"
+                           class="btn btn-sm btn-outline-warning" title="Desactivar">
+                            <i class="fas fa-eye-slash"></i>
+                        </a>
+                    {% else %}
+                        <a href="{{ url_for('activar_producto', id_producto=p.id_producto) }}"
+                           class="btn btn-sm btn-outline-success" title="Activar">
+                            <i class="fas fa-eye"></i>
+                        </a>
+                    {% endif %}
+                    <a href="{{ url_for('eliminar_producto', id_producto=p.id_producto) }}"
+                       class="btn btn-sm btn-outline-danger" title="Eliminar"
+                       onclick="return confirm('¿Eliminar este producto definitivamente?');">
+                        <i class="fas fa-trash"></i>
+                    </a>
+                </td>
+            </tr>
+            {% else %}
+            <tr><td colspan="8" class="text-center text-muted py-4">No hay productos todavía.</td></tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}

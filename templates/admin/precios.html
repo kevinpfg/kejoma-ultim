@@ -1,0 +1,53 @@
+{% extends "admin/base.html" %}
+{% block titulo %}Modificar precios{% endblock %}
+
+{% block contenido %}
+<h2 class="fw-bold mb-4">Modificar precios</h2>
+<p class="text-muted">Cambia el precio que quieras y da clic en <strong>Guardar cambios</strong> al final. Los campos que dejes vacíos no se tocan.</p>
+
+<form method="POST">
+<input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+<div class="table-responsive">
+    <table class="table table-hover align-middle bg-white shadow-sm rounded">
+        <thead class="table-dark">
+            <tr>
+                <th>Imagen</th>
+                <th>Producto</th>
+                <th>Marca</th>
+                <th>Categoría</th>
+                <th>Precio actual</th>
+                <th>Nuevo precio</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for p in productos %}
+            <tr>
+                <td>
+                    {% if p.imagen %}
+                        <img src="{{ url_for('static', filename='uploads/' ~ p.imagen) }}"
+                             style="width:50px;height:50px;object-fit:cover;border-radius:6px;">
+                    {% else %}
+                        <i class="fas fa-image text-secondary"></i>
+                    {% endif %}
+                </td>
+                <td class="fw-semibold">{{ p.nombre }}</td>
+                <td>{{ p.marca }}</td>
+                <td>{{ p.nombre_categoria }}</td>
+                <td>${{ "{:,.0f}".format(p.precio) }}</td>
+                <td>
+                    <input type="number" step="0.01" min="0" class="form-control form-control-sm"
+                           name="precio_{{ p.id_producto }}" placeholder="{{ '%.0f'|format(p.precio) }}">
+                </td>
+            </tr>
+            {% else %}
+            <tr><td colspan="6" class="text-center text-muted py-4">No hay productos todavía.</td></tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+<button type="submit" class="btn btn-success">
+    <i class="fas fa-save"></i> Guardar cambios
+</button>
+</form>
+{% endblock %}

@@ -1,0 +1,126 @@
+{% extends "admin/base.html" %}
+{% block titulo %}Admin{% endblock %}
+
+{% block contenido %}
+<div class="text-center mb-4">
+    <div class="mb-3">
+        <span style="font-size:3rem;">🔓</span>
+    </div>
+    <h1 class="fw-bold">Admin</h1>
+    <p class="text-muted">Sesión desbloqueada correctamente. Este es el estado actual de la tienda.</p>
+</div>
+
+<!-- ===== TARJETAS DE ESTADÍSTICAS ===== -->
+<div class="d-flex flex-wrap gap-3 mb-4" style="justify-content:center;">
+    <div class="card shadow-sm border-0 rounded-4 text-center py-3" style="flex:1 1 190px; max-width:220px;">
+        <div class="card-body">
+            <div class="mb-2" style="font-size:1.8rem;">💰</div>
+            <h3 class="fw-bold mb-0">{{ total_ventas }}</h3>
+            <p class="text-muted small mb-0">Ventas totales</p>
+        </div>
+    </div>
+    <div class="card shadow-sm border-0 rounded-4 text-center py-3" style="flex:1 1 190px; max-width:220px;">
+        <div class="card-body">
+            <div class="mb-2" style="font-size:1.8rem;">📦</div>
+            <h3 class="fw-bold mb-0">{{ total_productos }}</h3>
+            <p class="text-muted small mb-0">Productos registrados</p>
+        </div>
+    </div>
+    <div class="card shadow-sm border-0 rounded-4 text-center py-3" style="flex:1 1 190px; max-width:220px;">
+        <div class="card-body">
+            <div class="mb-2" style="font-size:1.8rem;">👟</div>
+            <h3 class="fw-bold mb-0 {{ 'text-danger' if productos_agotados > 0 else '' }}">{{ productos_agotados }}</h3>
+            <p class="text-muted small mb-0">Productos agotados</p>
+        </div>
+    </div>
+    <div class="card shadow-sm border-0 rounded-4 text-center py-3" style="flex:1 1 190px; max-width:220px;">
+        <div class="card-body">
+            <div class="mb-2" style="font-size:1.8rem;">🛒</div>
+            <h3 class="fw-bold mb-0">{{ pedidos_realizados }}</h3>
+            <p class="text-muted small mb-0">Unidades pedidas</p>
+        </div>
+    </div>
+    <div class="card shadow-sm border-0 rounded-4 text-center py-3 bg-dark text-white" style="flex:1 1 190px; max-width:220px;">
+        <div class="card-body">
+            <div class="mb-2" style="font-size:1.8rem;">💵</div>
+            <h3 class="fw-bold mb-0">${{ "{:,.0f}".format(dinero_vendido) }}</h3>
+            <p class="small mb-0 text-white-50">Dinero vendido</p>
+        </div>
+    </div>
+</div>
+
+<!-- ===== GRÁFICA DE VENTAS ===== -->
+<div class="card shadow-sm border-0 rounded-4 mb-4">
+    <div class="card-body p-4">
+        <h5 class="fw-bold mb-3"><i class="fas fa-chart-line text-success"></i> Ventas de los últimos 14 días</h5>
+        <canvas id="graficaVentas" height="90"></canvas>
+    </div>
+</div>
+
+<!-- ===== ACCESOS RÁPIDOS ===== -->
+<div class="row g-4 justify-content-center">
+    <div class="col-md-4">
+        <a href="{{ url_for('lista_productos') }}" class="text-decoration-none">
+            <div class="card shadow-sm h-100 text-center border-0 rounded-4 py-4">
+                <div class="card-body">
+                    <div class="mb-3" style="font-size:2.5rem;">👟</div>
+                    <h4 class="fw-bold text-dark">Productos</h4>
+                    <p class="text-muted mb-1">{{ total_productos }} productos registrados</p>
+                    <p class="text-muted small">Crear, editar, activar/desactivar y subir fotos</p>
+                </div>
+            </div>
+        </a>
+    </div>
+    <div class="col-md-4">
+        <a href="{{ url_for('modificar_precios') }}" class="text-decoration-none">
+            <div class="card shadow-sm h-100 text-center border-0 rounded-4 py-4">
+                <div class="card-body">
+                    <div class="mb-3" style="font-size:2.5rem;">💲</div>
+                    <h4 class="fw-bold text-dark">Precios</h4>
+                    <p class="text-muted mb-1">Modificar precios</p>
+                    <p class="text-muted small">Cambia el precio de todos los productos desde una tabla</p>
+                </div>
+            </div>
+        </a>
+    </div>
+    <div class="col-md-4">
+        <a href="{{ url_for('ventas') }}" class="text-decoration-none">
+            <div class="card shadow-sm h-100 text-center border-0 rounded-4 py-4">
+                <div class="card-body">
+                    <div class="mb-3" style="font-size:2.5rem;">🧾</div>
+                    <h4 class="fw-bold text-dark">Ventas</h4>
+                    <p class="text-muted mb-1">{{ total_ventas }} ventas registradas</p>
+                    <p class="text-muted small">Registrar ventas y ver productos vendidos</p>
+                </div>
+            </div>
+        </a>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js"></script>
+<script>
+const ctx = document.getElementById('graficaVentas');
+new Chart(ctx, {
+  type: 'line',
+  data: {
+    labels: {{ etiquetas_grafica | tojson }},
+    datasets: [{
+      label: 'Dinero vendido ($)',
+      data: {{ datos_grafica | tojson }},
+      borderColor: '#00c853',
+      backgroundColor: 'rgba(0,200,83,0.15)',
+      tension: 0.3,
+      fill: true,
+      pointBackgroundColor: '#00c853',
+    }]
+  },
+  options: {
+    responsive: true,
+    plugins: { legend: { display: false } },
+    scales: {
+      y: { beginAtZero: true, ticks: { callback: (v) => '$' + v.toLocaleString('es-CO') } }
+    }
+  }
+});
+</script>
+{% endblock %}

@@ -1,0 +1,62 @@
+{% extends "admin/base.html" %}
+{% block titulo %}Movimiento de inventario{% endblock %}
+
+{% block contenido %}
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <h2 class="fw-bold m-0">Movimiento de inventario</h2>
+    <a href="{{ url_for('inventario') }}" class="btn btn-outline-secondary btn-sm">
+        <i class="fas fa-arrow-left"></i> Volver a inventario
+    </a>
+</div>
+
+<div class="card border-0 shadow-sm mb-4">
+    <div class="card-body d-flex align-items-center gap-3">
+        {% if producto.imagen %}
+            <img src="{{ url_for('static', filename='uploads/' ~ producto.imagen) }}"
+                 style="width:70px;height:70px;object-fit:cover;border-radius:8px;">
+        {% else %}
+            <div class="bg-secondary bg-opacity-25 d-flex align-items-center justify-content-center"
+                 style="width:70px;height:70px;border-radius:8px;">
+                <i class="fas fa-image text-secondary"></i>
+            </div>
+        {% endif %}
+        <div>
+            <div class="fw-bold fs-5">{{ producto.nombre }}</div>
+            <div class="text-muted">{{ producto.marca }} · Stock actual: <span class="fw-bold">{{ producto.stock }}</span></div>
+        </div>
+    </div>
+</div>
+
+<div class="card border-0 shadow-sm" style="max-width:500px;">
+    <div class="card-body">
+        <form method="POST">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+
+            <div class="mb-3">
+                <label class="form-label">Tipo de movimiento</label>
+                <select name="tipo" class="form-select" required>
+                    <option value="Entrada">Entrada (llegó mercancía)</option>
+                    <option value="Salida">Salida (se dañó, se perdió, etc.)</option>
+                    <option value="Ajuste">Ajuste (fijar el stock a un número exacto)</option>
+                </select>
+            </div>
+
+            <div class="mb-3">
+                <label class="form-label">Cantidad</label>
+                <input type="number" name="cantidad" class="form-control" min="1" required>
+                <div class="form-text">Para "Ajuste", escribe el stock final que debe quedar registrado.</div>
+            </div>
+
+            <div class="mb-3">
+                <label class="form-label">Motivo (opcional)</label>
+                <input type="text" name="motivo" class="form-control" maxlength="255"
+                       placeholder="Ej: pedido a proveedor, producto dañado...">
+            </div>
+
+            <button type="submit" class="btn btn-success">
+                <i class="fas fa-check"></i> Guardar movimiento
+            </button>
+        </form>
+    </div>
+</div>
+{% endblock %}
